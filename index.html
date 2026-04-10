@@ -469,13 +469,13 @@ small     { font-size: 10px; color: var(--text2); font-family: var(--mono); }
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────────────────────
-// Change this to your deployed backend URL
-// e.g. "https://my-app.onrender.com" or "https://my-app.railway.app"
-// For local dev: "http://localhost:8000"
-const API = window.location.hostname === 'localhost'
-  ? 'http://localhost:8000'
-  : '';   // empty = same origin (Vercel / Render serving both)
+  // ── Config ──────────────────────────────────────────────────────────────────
+  // Change this to your deployed backend URL
+  // e.g. "https://my-app.onrender.com" or "https://my-app.railway.app"
+  // For local dev: "http://localhost:8000"
+  const API = window.location.hostname === 'localhost'
+    ? 'http://localhost:8000'
+    : 'https://kodex-vy6f.onrender.com';   // empty = same origin (Vercel / Render serving both)
 
 // ── State ────────────────────────────────────────────────────────────────────
 let selectedRepo  = null;   // { full_name, ... }
