@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DrkCode Improver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #060810;
+  --bg2:       #0c0e1a;
+  --bg3:       #121526;
+  --border:    #1e2236;
+  --border2:   #2a2f4a;
+  --accent:    #00f5c4;
+  --accent-d:  #00c49a;
+  --accent-g:  rgba(0,245,196,0.12);
+  --accent-g2: rgba(0,245,196,0.06);
+  --warn:      #ff6b6b;
+  --gold:      #ffd166;
+  --blue:      #4cc9f0;
+  --purple:    #7b61ff;
+  --text:      #e8eaf6;
+  --text2:     #6b7194;
+  --text3:     #363a58;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Syne', sans-serif;
+  --r:         10px;
+  --r2:        16px;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Noise + Grid BG ─────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,245,196,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,196,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(0,245,196,0.07) 0%, transparent 70%);
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+header { text-align: center; margin-bottom: 48px; }
+.logo-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px; }
+.logo-icon {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 30px rgba(0,245,196,0.3);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 30px rgba(0,245,196,0.3); }
+  50%      { box-shadow: 0 0 50px rgba(0,245,196,0.5), 0 0 80px rgba(76,201,240,0.2); }
+}
+.logo-text { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+.logo-text em { font-style: normal; color: var(--accent); }
+.tagline { font-family: var(--mono); font-size: 11px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; }
+
+/* ── Steps indicator ─────────────────────────────────────────────────────── */
+.steps {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 40px; flex-wrap: wrap;
+}
+.step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3);
+  transition: color 0.3s;
+}
+.step.active { color: var(--accent); }
+.step.done   { color: var(--text2); }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+  transition: all 0.3s;
+}
+.step.active .step-num { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.step.done .step-num   { background: var(--text3); color: var(--bg); border-color: var(--text3); }
+.step-arrow { color: var(--text3); font-size: 10px; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card.active { border-color: rgba(0,245,196,0.3); }
+.card.active::before { opacity: 1; }
+.card-title {
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title span { color: var(--accent); }
+
+/* ── Search ──────────────────────────────────────────────────────────────── */
+.search-row { display: flex; gap: 10px; }
+.input-wrap { flex: 1; position: relative; }
+.inp {
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-g); }
+.inp::placeholder { color: var(--text3); }
+.btn {
+  padding: 11px 20px;
+  border: none; border-radius: var(--r);
+  font-family: var(--sans); font-weight: 700; font-size: 13px;
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-d));
+  color: var(--bg);
+  box-shadow: 0 4px 20px rgba(0,245,196,0.25);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(0,245,196,0.35); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-ghost {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-dl {
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(76,201,240,0.25);
+}
+.btn-dl:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(76,201,240,0.35); }
+
+/* ── Repo list ───────────────────────────────────────────────────────────── */
+.repo-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.repo-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r); cursor: pointer;
+  transition: all 0.2s;
+}
+.repo-item:hover { border-color: var(--accent); background: var(--accent-g2); }
+.repo-item.selected { border-color: var(--accent); background: var(--accent-g); }
+.repo-icon { font-size: 16px; flex-shrink: 0; }
+.repo-info { flex: 1; min-width: 0; }
+.repo-name { font-family: var(--mono); font-size: 12px; font-weight: 500; margin-bottom: 2px; }
+.repo-desc { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.repo-meta { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.repo-stars { font-family: var(--mono); font-size: 10px; color: var(--gold); }
+.repo-lang { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+/* ── File input row ──────────────────────────────────────────────────────── */
+.file-row { display: flex; gap: 10px; margin-top: 14px; }
+
+/* ── Code preview ────────────────────────────────────────────────────────── */
+.code-block {
+  background: #080a14;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: #9fa8c7;
+  overflow: auto;
+  max-height: 300px;
+  white-space: pre;
+  tab-size: 2;
+  position: relative;
+}
+.code-block .line-num {
+  display: inline-block;
+  width: 32px;
+  color: var(--text3);
+  user-select: none;
+  text-align: right;
+  margin-right: 16px;
+}
+
+/* ── Diff view ───────────────────────────────────────────────────────────── */
+.diff-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.diff-label {
+  font-family: var(--mono); font-size: 9px; text-transform: uppercase;
+  letter-spacing: 1.5px; padding: 5px 10px;
+  border-radius: 4px 4px 0 0;
+  display: inline-block;
+}
+.diff-label.before { background: rgba(255,107,107,0.1); color: var(--warn); }
+.diff-label.after  { background: rgba(0,245,196,0.1);   color: var(--accent); }
+
+/* ── Improve options ─────────────────────────────────────────────────────── */
+.instructions-area {
+  width: 100%; min-height: 72px; resize: vertical;
+  padding: 10px 14px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+  outline: none; transition: border-color 0.2s;
+  line-height: 1.6;
+}
+.instructions-area:focus { border-color: var(--accent); }
+.instructions-area::placeholder { color: var(--text3); }
+
+/* ── Progress bar ────────────────────────────────────────────────────────── */
+.progress-bar {
+  height: 2px; background: var(--border); border-radius: 1px;
+  overflow: hidden; margin: 12px 0;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--blue));
+  border-radius: 1px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-fill.indeterminate {
+  width: 40%;
+  animation: slide 1.5s ease-in-out infinite;
+}
+@keyframes slide { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+
+/* ── Status badges ───────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 20px;
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+}
+.badge-ok   { background: rgba(0,245,196,0.1);  color: var(--accent); }
+.badge-err  { background: rgba(255,107,107,0.1); color: var(--warn); }
+.badge-info { background: rgba(76,201,240,0.1);  color: var(--blue); }
+
+/* ── Stats row ───────────────────────────────────────────────────────────── */
+.stats-row {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-top: 12px;
+}
+.stat {
+  font-family: var(--mono); font-size: 10px; color: var(--text2);
+  display: flex; align-items: center; gap: 5px;
+}
+.stat strong { color: var(--text); }
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+.toast-wrap { position: fixed; top: 18px; right: 18px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 10px 15px; background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  font-family: var(--mono); font-size: 11px;
+  display: flex; align-items: center; gap: 9px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: tin 0.25s ease, tout 0.25s ease 2.8s forwards;
+  max-width: 340px;
+}
+@keyframes tin  { from { opacity:0; transform: translateX(16px); } to { opacity:1; transform: translateX(0); } }
+@keyframes tout { from { opacity:1; } to { opacity:0; } }
+.toast.ok   { border-left: 3px solid var(--accent); }
+.toast.err  { border-left: 3px solid var(--warn); }
+.toast.info { border-left: 3px solid var(--blue); }
+
+/* ── Log panel ───────────────────────────────────────────────────────────── */
+.log-panel {
+  margin-top: 40px; border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+.log-toggle {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0; margin-bottom: 12px;
+}
+.log-toggle:hover { color: var(--text2); }
+.log-entries { display: none; }
+.log-entries.open { display: block; }
+.log-entry {
+  display: flex; gap: 12px; padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10px; color: var(--text2);
+}
+.log-ts { color: var(--text3); flex-shrink: 0; }
+.log-action { color: var(--accent); flex-shrink: 0; min-width: 60px; }
+.log-detail { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Section show/hide ───────────────────────────────────────────────────── */
+.section { display: none; }
+.section.show { display: block; }
+
+/* ── Utility ─────────────────────────────────────────────────────────────── */
+.mt8  { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mt16 { margin-top: 16px; }
+.flex-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.spacer   { flex: 1; }
+.hidden   { display: none !important; }
+.mono     { font-family: var(--mono); }
+small     { font-size: 10px; color: var(--text2); font-family: var(--mono); }
+
+@media (max-width: 640px) {
+  .diff-wrap { grid-template-columns: 1fr; }
+  .search-row { flex-direction: column; }
+  .file-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<div class="wrap">
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text"><em>Drk</em>Code Improver</div>
+    </div>
+    <div class="tagline">GitHub → AI Improvement → Download</div>
+  </header>
+
+  <!-- Steps -->
+  <div class="steps" id="stepsBar">
+    <div class="step active" id="step1"><div class="step-num">1</div>Search</div>
+    <span class="step-arrow">›</span>
+    <div class="step" id="step2"><div class="step-num">2</div>Pick File</div>
+    <span class="step-arrow">›</span>
+    <div class="step" id="step3"><div class="step-num">3</div>Improve</div>
+    <span class="step-arrow">›</span>
+    <div class="step" id="step4"><div class="step-num">4</div>Download</div>
+  </div>
+
+  <!-- ── STEP 1: Search ─────────────────────────────────────────────────── -->
+  <div class="card active" id="cardSearch">
+    <div class="card-title"><span>01</span> Search GitHub Repositories</div>
+    <div class="search-row">
+      <div class="input-wrap">
+        <input class="inp" id="searchInput" type="text"
+          placeholder="e.g. python web scraper, react dashboard, fastapi…"
+          onkeydown="if(event.key==='Enter') doSearch()">
+      </div>
+      <button class="btn btn-primary" id="searchBtn" onclick="doSearch()">🔍 Search</button>
+    </div>
+    <div class="progress-bar hidden" id="searchProgress">
+      <div class="progress-fill indeterminate"></div>
+    </div>
+    <div id="repoList" class="repo-list"></div>
+  </div>
+
+  <!-- ── STEP 2: Fetch File ─────────────────────────────────────────────── -->
+  <div class="card section" id="cardFetch">
+    <div class="card-title"><span>02</span> Select File from Repository</div>
+    <div class="flex-row mt8">
+      <div style="font-family:var(--mono);font-size:12px;color:var(--text2)">Repo:</div>
+      <div class="badge badge-info" id="selectedRepoLabel">—</div>
+    </div>
+    <div class="file-row mt12">
+      <div class="input-wrap">
+        <input class="inp" id="fileInput" type="text"
+          placeholder="filename or keyword, e.g. main.py, README, app, scraper"
+          onkeydown="if(event.key==='Enter') doFetch()">
+      </div>
+      <button class="btn btn-primary" id="fetchBtn" onclick="doFetch()">📥 Fetch File</button>
+    </div>
+    <div class="progress-bar hidden" id="fetchProgress">
+      <div class="progress-fill indeterminate"></div>
+    </div>
+    <!-- File preview -->
+    <div class="section mt16" id="previewSection">
+      <div class="flex-row">
+        <div class="badge badge-ok" id="fetchedFileBadge">—</div>
+        <div class="spacer"></div>
+        <div class="stats-row" id="fetchStats"></div>
+      </div>
+      <div class="code-block mt8" id="previewCode"></div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Improve ───────────────────────────────────────────────── -->
+  <div class="card section" id="cardImprove">
+    <div class="card-title"><span>03</span> AI Code Improvement</div>
+    <small>The AI will fix bugs, add type hints, improve naming, and add comments.</small>
+    <textarea class="instructions-area mt12" id="instructionsArea"
+      placeholder="Optional extra instructions… e.g. 'add async support', 'convert to TypeScript', 'add error handling'"></textarea>
+    <div class="flex-row mt12">
+      <button class="btn btn-primary" id="improveBtn" onclick="doImprove()">✨ Improve with AI</button>
+      <small id="improveHint">Uses Groq llama-3.3-70b</small>
+    </div>
+    <div class="progress-bar hidden" id="improveProgress">
+      <div class="progress-fill indeterminate"></div>
+    </div>
+    <!-- Diff view -->
+    <div class="section mt16" id="diffSection">
+      <div class="diff-wrap">
+        <div>
+          <div class="diff-label before">◀ Original</div>
+          <div class="code-block" id="origCode"></div>
+        </div>
+        <div>
+          <div class="diff-label after">▶ Improved</div>
+          <div class="code-block" id="improvedCode"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Download ──────────────────────────────────────────────── -->
+  <div class="card section" id="cardDownload">
+    <div class="card-title"><span>04</span> Download Improved File</div>
+    <div class="flex-row">
+      <button class="btn btn-dl" id="downloadBtn" onclick="doDownload()">⬇ Download Improved File</button>
+      <button class="btn btn-ghost" onclick="resetAll()">↺ Start Over</button>
+    </div>
+    <div class="stats-row mt12" id="downloadStats"></div>
+  </div>
+
+  <!-- ── Activity Log ──────────────────────────────────────────────────── -->
+  <div class="log-panel">
+    <button class="log-toggle" onclick="toggleLog()">
+      <span id="logToggleIcon">▸</span> Activity Log
+    </button>
+    <div class="log-entries" id="logEntries"></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+// Change this to your deployed backend URL
+// e.g. "https://my-app.onrender.com" or "https://my-app.railway.app"
+// For local dev: "http://localhost:8000"
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : '';   // empty = same origin (Vercel / Render serving both)
+
+// ── State ────────────────────────────────────────────────────────────────────
+let selectedRepo  = null;   // { full_name, ... }
+let currentJobId  = null;
+let fetchedContent = '';
+let improvedContent = '';
+let fetchedFilename = '';
+
+// ── UI helpers ───────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  const icons = { ok: '✓', err: '✕', info: 'ℹ' };
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${esc(msg)}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function esc(t) {
+  return String(t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showProgress(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideProgress(id) { document.getElementById(id).classList.add('hidden'); }
+function show(id)         { document.getElementById(id).classList.add('show'); }
+function hide(id)         { document.getElementById(id).classList.remove('show'); }
+function setCard(id)      { document.getElementById(id).classList.add('active'); }
+
+function setStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`step${i}`);
+    el.classList.remove('active', 'done');
+    if (i < n)  el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+
+function formatCode(code, maxLines = 120) {
+  const lines = code.split('\n').slice(0, maxLines);
+  return lines.map((l, i) =>
+    `<span class="line-num">${String(i + 1).padStart(3,' ')}</span>${esc(l)}`
+  ).join('\n');
+}
+
+function addLog(action, detail) {
+  const wrap = document.getElementById('logEntries');
+  const ts = new Date().toLocaleTimeString('en', { hour12: false });
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.innerHTML = `<span class="log-ts">${ts}</span><span class="log-action">${esc(action)}</span><span class="log-detail">${esc(detail)}</span>`;
+  wrap.prepend(el);
+  // cap at 50 entries
+  while (wrap.children.length > 50) wrap.removeChild(wrap.lastChild);
+}
+
+function toggleLog() {
+  const el = document.getElementById('logEntries');
+  const icon = document.getElementById('logToggleIcon');
+  el.classList.toggle('open');
+  icon.textContent = el.classList.contains('open') ? '▾' : '▸';
+}
+
+// ── Step 1: Search ───────────────────────────────────────────────────────────
+async function doSearch() {
+  const kw = document.getElementById('searchInput').value.trim();
+  if (!kw) { toast('Enter a keyword to search', 'err'); return; }
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true; btn.textContent = '⏳ Searching…';
+  showProgress('searchProgress');
+  document.getElementById('repoList').innerHTML = '';
+
+  addLog('search', kw);
+
+  try {
+    const r = await fetch(`${API}/api/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword: kw }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Search failed');
+
+    renderRepoList(data.results);
+    toast(`Found ${data.results.length} repositories`, 'ok');
+  } catch(e) {
+    toast('Search error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Search';
+    hideProgress('searchProgress');
+  }
+}
+
+function renderRepoList(repos) {
+  const wrap = document.getElementById('repoList');
+  if (!repos.length) { wrap.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text3);padding:10px 0">No repos found. Try a different keyword.</div>'; return; }
+
+  wrap.innerHTML = repos.map((r, i) => `
+    <div class="repo-item" id="repo-${i}" onclick="selectRepo(${i}, ${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <span class="repo-icon">📦</span>
+      <div class="repo-info">
+        <div class="repo-name">${esc(r.full_name)}</div>
+        <div class="repo-desc">${esc(r.description || 'No description')}</div>
+      </div>
+      <div class="repo-meta">
+        <span class="repo-stars">★ ${r.stars.toLocaleString()}</span>
+        <span class="repo-lang">${esc(r.language || '')}</span>
+      </div>
+    </div>`).join('');
+}
+
+function selectRepo(i, repo) {
+  // Deselect all
+  document.querySelectorAll('.repo-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById(`repo-${i}`).classList.add('selected');
+
+  selectedRepo = repo;
+  document.getElementById('selectedRepoLabel').textContent = repo.full_name;
+
+  // Show fetch card
+  show('cardFetch');
+  setCard('cardFetch');
+  setStep(2);
+  document.getElementById('fileInput').focus();
+  addLog('select', repo.full_name);
+  toast(`Selected: ${repo.full_name}`, 'ok');
+}
+
+// ── Step 2: Fetch File ───────────────────────────────────────────────────────
+async function doFetch() {
+  if (!selectedRepo) { toast('Select a repo first', 'err'); return; }
+  const filename = document.getElementById('fileInput').value.trim();
+  if (!filename)   { toast('Enter a filename or keyword', 'err'); return; }
+
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true; btn.textContent = '⏳ Cloning & searching…';
+  showProgress('fetchProgress');
+  hide('previewSection');
+
+  addLog('fetch', `${selectedRepo.full_name} → ${filename}`);
+
+  try {
+    const r = await fetch(`${API}/api/fetch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo_full_name: selectedRepo.full_name,
+        filename: filename,
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Fetch failed');
+
+    // Store state
+    currentJobId    = data.job_id;
+    fetchedContent  = data.preview;  // preview only; full content improved server-side
+    fetchedFilename = data.filename;
+
+    // Render preview
+    document.getElementById('fetchedFileBadge').textContent = data.filename;
+    document.getElementById('fetchStats').innerHTML = `
+      <div class="stat">📄 <strong>${data.lines}</strong> lines</div>
+      <div class="stat">💾 <strong>${(data.size/1000).toFixed(1)} KB</strong></div>`;
+    document.getElementById('previewCode').innerHTML = formatCode(data.preview);
+    show('previewSection');
+
+    // Show improve card
+    show('cardImprove');
+    setCard('cardImprove');
+    setStep(3);
+    toast(`Fetched: ${data.filename} (${data.lines} lines)`, 'ok');
+
+  } catch(e) {
+    toast('Fetch error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '📥 Fetch File';
+    hideProgress('fetchProgress');
+  }
+}
+
+// ── Step 3: Improve ──────────────────────────────────────────────────────────
+async function doImprove() {
+  if (!currentJobId) { toast('Fetch a file first', 'err'); return; }
+
+  const instructions = document.getElementById('instructionsArea').value.trim();
+  const btn = document.getElementById('improveBtn');
+  btn.disabled = true; btn.textContent = '⏳ AI is improving…';
+  showProgress('improveProgress');
+  hide('diffSection');
+
+  addLog('improve', fetchedFilename + (instructions ? ` | ${instructions}` : ''));
+
+  try {
+    const r = await fetch(`${API}/api/improve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        job_id: currentJobId,
+        instructions: instructions || null,
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Improve failed');
+
+    improvedContent = data.improved;
+
+    // Show diff side by side
+    document.getElementById('origCode').innerHTML    = formatCode(fetchedContent, 60);
+    document.getElementById('improvedCode').innerHTML = formatCode(data.improved, 60);
+    show('diffSection');
+
+    // Show download card
+    show('cardDownload');
+    setCard('cardDownload');
+    setStep(4);
+
+    document.getElementById('downloadStats').innerHTML = `
+      <div class="stat">📄 Improved: <strong>${data.lines}</strong> lines</div>
+      <div class="stat">📁 File: <strong>${esc(data.filename)}</strong></div>
+      <div class="badge badge-ok" style="margin-left:auto">✓ Ready to download</div>`;
+
+    toast('AI improvement complete!', 'ok');
+    addLog('done', `improved_${data.filename} ready`);
+
+  } catch(e) {
+    toast('Improve error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ Improve with AI';
+    hideProgress('improveProgress');
+  }
+}
+
+// ── Step 4: Download ─────────────────────────────────────────────────────────
+async function doDownload() {
+  if (!currentJobId) { toast('No improved file ready', 'err'); return; }
+
+  addLog('download', `improved_${fetchedFilename}`);
+
+  try {
+    // Hit the download endpoint which returns the file as attachment
+    const r = await fetch(`${API}/api/download/${currentJobId}`);
+    if (!r.ok) {
+      const data = await r.json().catch(() => ({}));
+      throw new Error(data.detail || 'Download failed');
+    }
+
+    // Read response as blob and trigger browser download
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `improved_${fetchedFilename}`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast('Download started!', 'ok');
+  } catch(e) {
+    toast('Download error: ' + e.message, 'err');
+  }
+}
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+function resetAll() {
+  selectedRepo = null; currentJobId = null;
+  fetchedContent = ''; improvedContent = ''; fetchedFilename = '';
+
+  document.getElementById('searchInput').value = '';
+  document.getElementById('fileInput').value   = '';
+  document.getElementById('instructionsArea').value = '';
+  document.getElementById('repoList').innerHTML = '';
+
+  hide('cardFetch'); hide('cardImprove'); hide('cardDownload');
+  hide('previewSection'); hide('diffSection');
+
+  document.getElementById('cardSearch').classList.add('active');
+  setStep(1);
+  document.getElementById('searchInput').focus();
+  toast('Ready for a new search', 'info');
+}
+
+// ── Keyboard shortcut ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') resetAll();
+});
+
+// ── On load: show log open by default if desired ─────────────────────────────
+// toggleLog(); // uncomment to start with log open
+</script>
+</body>
+</html>
